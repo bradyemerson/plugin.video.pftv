@@ -1,0 +1,74 @@
+# XBMC Media Center language file
+msgid ""
+msgstr ""
+"Project-Id-Version: plugin.video.pftv\n"
+"Report-Msgid-Bugs-To: brady@bradyemerson.com\n"
+"POT-Creation-Date: 2014-01-18 23:41+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: brady@bradyemerson.com\n"
+"Language-Team: LANGUAGE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+msgctxt "#30000"
+msgid "General"
+msgstr ""
+
+msgctxt "#30001"
+msgid "Library"
+msgstr ""
+
+msgctxt "#30002"
+msgid "Enable Export to Library"
+msgstr ""
+
+msgctxt "#30003"
+msgid "Folder Location"
+msgstr ""
+
+msgctxt "#30101"
+msgid "Built-in Folder"
+msgstr ""
+
+msgctxt "#30102"
+msgid "Custom Folder"
+msgstr ""
+
+msgctxt "#30036"
+msgid "Custom Folder"
+msgstr ""
+
+msgctxt "#30037"
+msgid "Library Folder stored in addon settings"
+msgstr ""
+
+msgctxt "#30038"
+msgid "Update Library after Exporting"
+msgstr ""
+
+msgctxt "#33000"
+msgid "Stations"
+msgstr ""
+
+msgctxt "#39006"
+msgid "Remove from PFTV Favorites"
+msgstr ""
+
+msgctxt "#39007"
+msgid "Add to PFVT Favorites"
+msgstr ""
+
+msgctxt "#39019"
+msgid "Import"
+msgstr ""
+
+msgctxt "#39024"
+msgid "Exception"
+msgstr ""
+
+msgctxt "#39025"
+msgid "Add Episode Identifier"
+msgstr ""
