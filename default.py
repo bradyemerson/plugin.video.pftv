@@ -23,7 +23,7 @@ def modes():
         cm = [('Force Movie Database Refresh', 'XBMC.RunPlugin(%s)' % (sys.argv[0] + '?mode=movies&sitemode=refresh_db'))]
         #common.add_directory('Movies', 'movies', 'list_movie_root', contextmenu=cm)
 
-        cm = [('Force TV Database Refresh', 'XBMC.RunPlugin(%s)' % (sys.argv[0] + '?mode=tv&sitemode=refresh_db'))]
+        cm = [('Force TV Series Refresh', 'XBMC.RunPlugin(%s)' % (sys.argv[0] + '?mode=tv&sitemode=refresh_db'))]
         common.add_directory('TV Shows', 'tv', 'list_tv_root', contextmenu=cm)
 
         common.add_directory('Video Resolver Settings', 'n/a', 'resolver_settings', is_folder=False)

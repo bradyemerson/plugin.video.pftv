@@ -21,8 +21,10 @@ def list_tv_root():
     cm = [('Export Favorites to Library', 'XBMC.RunPlugin(%s)' % cm_u)]
     common.add_directory('Favorites', 'tv', 'list_tvshows_favor_filtered', contextmenu=cm)
 
+    cm = []
     cm_u = sys.argv[0] + '?mode=tv&sitemode=list_tvshows_export&url=""'
-    cm = [('Export All to Library', 'XBMC.RunPlugin(%s)' % cm_u)]
+    # cm.append(('Export All to Library', 'XBMC.RunPlugin(%s)' % cm_u))
+    cm.append(('Force TV Series Refresh', 'XBMC.RunPlugin(%s)' % (sys.argv[0] + '?mode=tv&sitemode=refresh_db')))
     common.add_directory('All Shows', 'tv', 'list_tvshows_az', contextmenu=cm)
 
     # common.add_directory('Genres', 'tv', 'list_tvshow_types', 'GENRE')

@@ -355,6 +355,12 @@ def update_series_list(force=False):
 
 
 def update_series(series, force=False):
+    # Check for new seasons every 3 days
+    last_update = common.parse_date(series['last_update'], '%Y-%m-%d %H:%M:%S.%f')
+    if (date.today() - last_update.date()).days < 3 and force is False:
+        # No update needed
+        return
+
     data = connection.get_url(series['url'])
     tree = BeautifulSoup(data, 'html.parser')
 
@@ -377,6 +383,12 @@ def update_series(series, force=False):
 
 
 def update_season(season, force=False):
+    # Check for new episodes every 12 hours
+    last_update = common.parse_date(season['last_update'], '%Y-%m-%d %H:%M:%S.%f')
+    if (datetime.now() - last_update).seconds < 43200 and force is False:
+        # No update needed
+        return
+
     data = connection.get_url(season['url'])
     if data is False:
         common.notification('Error Updating Season Data')
