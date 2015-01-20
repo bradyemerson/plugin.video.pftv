@@ -161,6 +161,9 @@ def _add_series_item(data, total=0):
                                                                                            data['title']))
         contextmenu.append((common.localise(39007), 'XBMC.RunPlugin(%s)' % cm_u))
 
+    cm_u = sys.argv[0] + '?url={0}&mode=tv&sitemode=update_series'.format(data['series_id'])
+    contextmenu.append(('Force Series Update', 'XBMC.RunPlugin(%s)' % cm_u))
+
     item.addContextMenuItems(contextmenu)
 
     u = sys.argv[0] + '?url={0}&mode=tv&sitemode=list_tv_seasons'.format(data['series_id'])
@@ -197,6 +200,8 @@ def _add_season_item(data, total=0):
     contextmenu = []
     cm_u = sys.argv[0] + '?url={0}&mode=tv&sitemode=export_season'.format(data['season_id'])
     contextmenu.append(('Export Season to Library', 'XBMC.RunPlugin(%s)' % cm_u))
+    cm_u = sys.argv[0] + '?url={0}&mode=tv&sitemode=update_season'.format(data['season_id'])
+    contextmenu.append(('Force Season Update', 'XBMC.RunPlugin(%s)' % cm_u))
     item.addContextMenuItems(contextmenu)
 
     u = sys.argv[0] + '?url={0}&mode=tv&sitemode=list_episodes'.format(data['season_id'])
@@ -229,10 +234,9 @@ def _add_episode_item(data, total):
         'playcount': data['play_count']
     }
 
-    #if data['air_date']:
-    #    print type(data['air_date'])
-    #    print data['air_date']
-    #    labels['year'] = data['air_date'].strptime('%Y')
+    if data['air_date']:
+        labels['year'] = data['air_date'][:4]
+        labels['aired'] = data['air_date'][:10]
 
     item = xbmcgui.ListItem(data['title'])
     item.setInfo(type='Video', infoLabels=labels)
@@ -337,6 +341,18 @@ def unfavor_series():
         common.refresh_menu()
     else:
         common.notification('Error removing movie from favorites', isError=True)
+
+
+def update_series():
+    series = tv_db.lookup_series(common.args.url).fetchone()
+    tv_db.update_series(series, True)
+    common.notification('{0} Updated'.format(series['title']))
+
+
+def update_season():
+    season = tv_db.lookup_season(common.args.url).fetchone()
+    tv_db.update_season(season, True)
+    common.notification('{0} Updated'.format(season['title']))
 
 
 def watch_episode():

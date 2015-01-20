@@ -52,7 +52,7 @@ def create():
     c.close()
 
 
-def insert_series(title, url, directors=None, actors=None, genres=None, year=None, studio=None, network=None):
+def _insert_series(title, url, directors=None, actors=None, genres=None, year=None, studio=None, network=None):
     c = _database.cursor()
     row = c.execute('SELECT series_id FROM series WHERE title = ?', (title,)).fetchone()
     if row:
@@ -77,7 +77,7 @@ def insert_series(title, url, directors=None, actors=None, genres=None, year=Non
             'year': year,
             'studio': studio,
             'network': network,
-            'last_update': datetime.now()
+            'last_update': None
         })
     else:
         c.execute('''INSERT INTO series (
@@ -108,14 +108,14 @@ def insert_series(title, url, directors=None, actors=None, genres=None, year=Non
             'year': year,
             'studio': studio,
             'network': network,
-            'last_update': datetime.now()
+            'last_update': None
         })
 
     _database.commit()
     c.close()
 
 
-def insert_season(series_id, title, url, season_no):
+def _insert_season(series_id, title, url, season_no):
     c = _database.cursor()
     row = c.execute('SELECT season_id FROM season WHERE title = ? AND series_id = ?', (title,series_id)).fetchone()
     if row:
@@ -130,7 +130,7 @@ def insert_season(series_id, title, url, season_no):
             'title': title,
             'season_no': season_no,
             'url': url,
-            'last_update': datetime.now()
+            'last_update': None
         })
     else:
         c.execute('''INSERT INTO season (series_id, title, season_no, url, last_update) VALUES (
@@ -144,14 +144,14 @@ def insert_season(series_id, title, url, season_no):
             'title': title,
             'season_no': season_no,
             'url': url,
-            'last_update': datetime.now()
+            'last_update': None
         })
 
     _database.commit()
     c.close()
 
 
-def insert_episode(season_id, title, episode_no=None, plot=None, air_date=None):
+def _insert_episode(season_id, title, episode_no=None, plot=None, air_date=None):
     c = _database.cursor()
     c.execute('''INSERT OR REPLACE INTO episode (season_id, title, episode_no, plot, air_date, play_count) VALUES (
         :season_id,
@@ -189,6 +189,24 @@ def lookup_episode(title, season_id):
 def delete_series(content_id):
     c = _database.cursor()
     c.execute('DELETE FROM series WHERE series_id = (?)', (content_id,))
+    c.close()
+
+
+def _update_series_last_update(series_id, time=datetime.now()):
+    c = _database.cursor()
+    c.execute('UPDATE series SET last_update = :last_update WHERE series_id = :series_id', {
+        'last_update': time,
+        'series_id': series_id
+    })
+    c.close()
+
+
+def _update_season_last_update(season_id, time=datetime.now()):
+    c = _database.cursor()
+    c.execute('UPDATE season SET last_update = :last_update WHERE season_id = :season_id', {
+        'last_update': time,
+        'season_id': season_id
+    })
     c.close()
 
 
@@ -349,17 +367,18 @@ def update_series_list(force=False):
         title = common.normalize_string(link.find('b').string).strip()
         url = '{0}/internet/{1}'.format(db_common.WEB_DOMAIN, link['href'])
 
-        insert_series(title, url)
+        _insert_series(title, url)
 
     _set_last_update()
 
 
 def update_series(series, force=False):
     # Check for new seasons every 3 days
-    last_update = common.parse_date(series['last_update'], '%Y-%m-%d %H:%M:%S.%f')
-    if (date.today() - last_update.date()).days < 3 and force is False:
-        # No update needed
-        return
+    if force is False and series['last_update']:
+        last_update = common.parse_date(series['last_update'], '%Y-%m-%d %H:%M:%S.%f')
+        if (date.today() - last_update.date()).days < 3:
+            # No update needed
+            return
 
     data = connection.get_url(series['url'])
     tree = BeautifulSoup(data, 'html.parser')
@@ -379,15 +398,18 @@ def update_series(series, force=False):
             # For now don't import specials. Perhaps make this an option later
             continue
 
-        insert_season(series['series_id'], title, url, season_no)
+        _insert_season(series['series_id'], title, url, season_no)
+
+    _update_series_last_update(series['series_id'])
 
 
 def update_season(season, force=False):
     # Check for new episodes every 12 hours
-    last_update = common.parse_date(season['last_update'], '%Y-%m-%d %H:%M:%S.%f')
-    if (datetime.now() - last_update).seconds < 43200 and force is False:
-        # No update needed
-        return
+    if force is False and season['last_update']:
+        last_update = common.parse_date(season['last_update'], '%Y-%m-%d %H:%M:%S.%f')
+        if (datetime.now() - last_update).seconds < 43200:
+            # No update needed
+            return
 
     data = connection.get_url(season['url'])
     if data is False:
@@ -419,12 +441,18 @@ def update_season(season, force=False):
 
         title = common.normalize_string(episode_td.find('b').string).strip()
 
-        air_date_td = episode_tr.find('td', attrs={'align': 'right'})
-        air_date_value = air_date_td.find('div').string
-        air_date_value = air_date_value[air_date_value.find(': ')+2:]
-        air_date = common.parse_date(air_date_value, '%d %B %Y')
+        air_date = None
+        try:
+            air_date_td = episode_tr.find('td', attrs={'align': 'right'})
+            air_date_value = air_date_td.find('div').string
+            air_date_value = air_date_value[air_date_value.find(': ')+2:]
+            air_date = common.parse_date(air_date_value, '%d %B %Y')
+        except:
+            pass
 
-        insert_episode(season['season_id'], title, episode_no, None, air_date)
+        _insert_episode(season['season_id'], title, episode_no, None, air_date)
+
+    _update_season_last_update(season['season_id'])
 
 
 def get_media_urls(season_url, episode_title):
