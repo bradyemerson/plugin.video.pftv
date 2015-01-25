@@ -49,6 +49,10 @@ msgctxt "#30038"
 msgid "Update Library after Exporting"
 msgstr ""
 
+msgctxt "#30039"
+msgid "Automatically add export folders as Kodi video sources"
+msgstr ""
+
 msgctxt "#33000"
 msgid "Stations"
 msgstr ""
@@ -67,8 +71,4 @@ msgstr ""
 
 msgctxt "#39024"
 msgid "Exception"
-msgstr ""
-
-msgctxt "#39025"
-msgid "Add Episode Identifier"
 msgstr ""

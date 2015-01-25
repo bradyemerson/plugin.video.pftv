@@ -282,10 +282,17 @@ def play_episode():
         return
 
     links = tv_db.get_media_urls(urllib.unquote_plus(common.args.url), urllib.unquote_plus(common.args.episode_title))
+
     sources = []
     for link in links:
-        print link
         sources.append(urlresolver.HostedMediaFile(host=link['host'], media_id=link['media_id'], title=link['title']))
+
+    sources = urlresolver.filter_source_list(sources)
+
+    if len(sources) == 0:
+        xbmcgui.Dialog().ok("Play Error", "Sorry, no compatible links are available at this time")
+        xbmcplugin.setResolvedUrl(pluginhandle, False, xbmcgui.ListItem())
+        return
 
     source = urlresolver.choose_source(sources)
 

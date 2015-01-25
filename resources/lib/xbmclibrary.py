@@ -22,11 +22,15 @@ else:  # == 1
         MOVIE_PATH = os.path.join(xbmc.translatePath(common.get_setting('customlibraryfolder')), 'Movies')
         TV_SHOWS_PATH = os.path.join(xbmc.translatePath(common.get_setting('customlibraryfolder')), 'TV')
     else:
-        # notify of the missing config...
-        pass
+        xbmcgui.Dialog().ok("Error", "Set location of custom folder or use built in folder")
+        common.open_settings()
 
 
 def setup_library():
+    if common.get_setting('autoaddfolders') != 'yes':
+        common.notification('Starting Export', 10000)
+        return False
+
     source_path = os.path.join(xbmc.translatePath('special://profile/'), 'sources.xml')
     dialog = xbmcgui.Dialog()
 
@@ -39,26 +43,9 @@ def setup_library():
         content = file.read()
         file.close()
     except:
-        dialog.ok("Error", "Could not read from sources.xml, does it really exist?")
-        file = open(source_path, 'w')
-        content = "<sources>\n"
-        content += "    <programs>"
-        content += "        <default pathversion=\"1\"></default>"
-        content += "    </programs>"
-        content += "    <video>"
-        content += "        <default pathversion=\"1\"></default>"
-        content += "    </video>"
-        content += "    <music>"
-        content += "        <default pathversion=\"1\"></default>"
-        content += "    </music>"
-        content += "    <pictures>"
-        content += "        <default pathversion=\"1\"></default>"
-        content += "    </pictures>"
-        content += "    <files>"
-        content += "        <default pathversion=\"1\"></default>"
-        content += "    </files>"
-        content += "</sources>"
-        file.close()
+        # TODO Provide a Yes/No option here
+        dialog.ok("Error adding new sources ", "Could not read from sources.xml, does it really exist?")
+        return False
 
     soup = BeautifulSoup(content)
     video = soup.find("video")
@@ -117,15 +104,12 @@ def update_xbmc_library():
 
 def complete_export(added_folders):
     if added_folders:
-        response = xbmcgui.Dialog()\
-            .yesno("Added {0} Folders to Video Sources".format('PFTV'),
-                   "Two steps are required to complete the process:",
-                   "1. Kodi must be restarted",
-                   "2. After restarting, you must configure the content type of the {0} folders in the File section".format('PFTV'),
-                   nolabel="Restart Kodi Later", yeslabel="Quit Kodi Now"
+        xbmcgui.Dialog() \
+            .ok("Added PFTV Folders to Video Sources",
+                "Two steps are required to complete the process:",
+                "1. Kodi must be restarted",
+                "2. After restarting, you must configure the content type of the PFTV folders in the File section"
             )
-        if response == 'Yes':
-            xbmc.executebuiltin('Quit')
     else:
         common.notification('Export Complete')
         if common.get_setting('updatelibraryafterexport') == 'true':
